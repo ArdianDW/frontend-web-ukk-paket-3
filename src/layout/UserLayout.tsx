@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom"
 function UserLayout() {
   return (
     <>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
             <Outlet/>
         </ThemeProvider>
     </>
