@@ -91,10 +91,6 @@ const data = {
           title: "Peminjaman & Pengembalian",
           url: "#",
         },
-        {
-          title: "Barang Rusak atau Hilang",
-          url: "#",
-        },
       ],
     },
     {

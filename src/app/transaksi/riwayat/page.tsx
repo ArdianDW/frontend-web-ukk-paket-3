@@ -1,5 +1,6 @@
-"use client"
+"use client";
 
+import { useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -20,13 +21,50 @@ import {
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 
-const dataRiwayat = [
-  { id: 1, nama: "John Doe", jenis: "Elektronik", barang: "Laptop", jumlah: 1, ruang: "Ruang 101", kondisi: "Baik", tanggalPinjam: "2023-10-01", tanggalKembali: "2023-10-10" },
-  { id: 2, nama: "Jane Smith", jenis: "Elektronik", barang: "Proyektor", jumlah: 2, ruang: "Ruang 202", kondisi: "Rusak", tanggalPinjam: "2023-10-05", tanggalKembali: "2023-10-12" },
-  { id: 3, nama: "Alice Johnson", jenis: "Fotografi", barang: "Kamera", jumlah: 1, ruang: "Ruang 303", kondisi: "Baik", tanggalPinjam: "2023-10-07", tanggalKembali: "2023-10-15" },
-];
-
 export default function RiwayatPage() {
+  const [dataRiwayat, setDataRiwayat] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const accessToken = localStorage.getItem('access_token');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/api/aktivitas/", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data");
+        }
+
+        const data = await response.json();
+
+        const formattedData = data.flatMap((item) =>
+          item.details.map((detail) => ({
+            id: item.id,
+            nama: item.nama_peminjam,
+            jenis: detail.jenis_barang,
+            barang: detail.nama_barang,
+            jumlah: detail.jumlah_barang,
+            ruang: detail.ruang,
+            tanggalPinjam: item.tanggal_pinjam,
+          }))
+        );
+
+        setDataRiwayat(formattedData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -50,37 +88,38 @@ export default function RiwayatPage() {
         </header>
         <div className="flex flex-1 flex-col gap-2 p-4">
           <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
-            <h1 className="text-3xl font-bold mb-6">Riwayat Pengembalian Barang</h1>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-base">No</TableHead>
-                  <TableHead className="text-base">Nama Peminjam</TableHead>
-                  <TableHead className="text-base">Jenis Barang</TableHead>
-                  <TableHead className="text-base">Ruang</TableHead>
-                  <TableHead className="text-base">Nama Barang</TableHead>
-                  <TableHead className="text-base">Jumlah Barang</TableHead>
-                  <TableHead className="text-base">Kondisi Barang</TableHead>
-                  <TableHead className="text-base">Tanggal Peminjaman</TableHead>
-                  <TableHead className="text-base">Tanggal Pengembalian</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dataRiwayat.map((riwayat, index) => (
-                  <TableRow key={riwayat.id}>
-                    <TableCell className="text-sm">{index + 1}</TableCell>
-                    <TableCell className="text-sm">{riwayat.nama}</TableCell>
-                    <TableCell className="text-sm">{riwayat.jenis}</TableCell>
-                    <TableCell className="text-sm">{riwayat.ruang}</TableCell>
-                    <TableCell className="text-sm">{riwayat.barang}</TableCell>
-                    <TableCell className="text-sm">{riwayat.jumlah}</TableCell>
-                    <TableCell className="text-sm">{riwayat.kondisi}</TableCell>
-                    <TableCell className="text-sm">{riwayat.tanggalPinjam}</TableCell>
-                    <TableCell className="text-sm">{riwayat.tanggalKembali}</TableCell>
+            <h1 className="text-3xl font-bold mb-6">Riwayat Peminjaman Barang</h1>
+
+            {loading ? (
+              <p className="text-center text-gray-500">Memuat data...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-base">No</TableHead>
+                    <TableHead className="text-base">Nama Peminjam</TableHead>
+                    <TableHead className="text-base">Jenis Barang</TableHead>
+                    <TableHead className="text-base">Nama Barang</TableHead>
+                    <TableHead className="text-base">Jumlah Barang</TableHead>
+                    <TableHead className="text-base">Ruang</TableHead>
+                    <TableHead className="text-base">Tanggal Peminjaman</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {dataRiwayat.map((riwayat, index) => (
+                    <TableRow key={`${riwayat.id}-${index}`}>
+                      <TableCell className="text-sm">{index + 1}</TableCell>
+                      <TableCell className="text-sm">{riwayat.nama}</TableCell>
+                      <TableCell className="text-sm">{riwayat.jenis}</TableCell>
+                      <TableCell className="text-sm">{riwayat.barang}</TableCell>
+                      <TableCell className="text-sm">{riwayat.jumlah}</TableCell>
+                      <TableCell className="text-sm">{riwayat.ruang}</TableCell>
+                      <TableCell className="text-sm">{riwayat.tanggalPinjam}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </div>
         </div>
       </SidebarInset>

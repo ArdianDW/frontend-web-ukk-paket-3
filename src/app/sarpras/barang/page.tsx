@@ -13,6 +13,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage
 } from "@/components/ui/breadcrumb";
@@ -169,6 +170,9 @@ export default function BarangPage() {
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
+                <BreadcrumbItem>
+                <BreadcrumbLink href="/">Beranda</BreadcrumbLink>
+                </BreadcrumbItem>
                 <BreadcrumbItem>
                   <BreadcrumbPage>Barang</BreadcrumbPage>
                 </BreadcrumbItem>

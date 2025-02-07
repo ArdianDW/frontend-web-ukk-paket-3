@@ -97,9 +97,9 @@ export default function JenisPage() {
       },
     })
     .then(() => {
-      fetchData(); // Refresh data setelah update
-      reset(); // Reset form setelah submit
-      setSelectedJenis(null); // Tutup dialog
+      fetchData(); 
+      reset(); 
+      setSelectedJenis(null); 
     })
     .catch(error => console.error("Error updating data:", error));
   };
