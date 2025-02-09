@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
+
 import {
   Form,
   FormControl,
@@ -28,6 +30,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   nama: z.string().min(1, "Nama barang diperlukan"),
@@ -55,6 +58,7 @@ export default function TambahBarangPage() {
   const idPetugas = 1;
   const accessToken = localStorage.getItem("access_token");
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     axios.get("http://127.0.0.1:8000/api/ruang/", {
@@ -110,6 +114,11 @@ export default function TambahBarangPage() {
     })
     .then(response => {
       console.log("Data Barang berhasil disimpan:", response.data);
+      toast({
+        title: "Sukses",
+        description: "Barang berhasil ditambahkan.",
+        action: <CheckCircle className="h-6 w-6 text-green-500" />,
+      });
       navigate("/barang");
     })
     .catch(error => {

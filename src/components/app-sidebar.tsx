@@ -18,7 +18,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useAuth } from '../hooks/use-auth'
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -113,9 +112,10 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
 
-  console.log(user);
+  const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  const namaPetugas = userData.nama_petugas;
+  const level = userData.level;
 
   const handleNavigation = (url: string) => {
     navigate(url);
@@ -127,6 +127,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     navigate('/login');
   };
 
+  // Filter menu based on user role
+  const filteredNavMain = data.navMain.map((item) => {
+    if (level === 'Admin' && item.title === 'Data Sarpras') {
+      return null; 
+    }
+    if (level === 'Operator' && item.title === 'Pengguna') {
+      return {
+        ...item,
+        items: item.items.filter(subItem => subItem.title !== 'Daftar Pengguna')
+      };
+    }
+    return item;
+  }).filter(Boolean); 
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -139,8 +152,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <User className="size-4" />
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none ml-2">
-                    <span className="font-semibold">{user?.nama_petugas || 'Admin 1'}</span>
-                    <span className="">{user?.level || 'Administrator'}</span>
+                    <span className="font-semibold">{namaPetugas}</span>
+                    <span className="">{level}</span>
                   </div>
                 </div>
                 <AlertDialog>
@@ -171,42 +184,44 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="gap-0">
         {/* We create a collapsible SidebarGroup for each parent. */}
-        {data.navMain.map((item) => (
-          <Collapsible
-            key={item.title}
-            title={item.title}
-            defaultOpen={true}
-            className="group/collapsible"
-          >
-            <SidebarGroup>
-              <SidebarGroupLabel
-                asChild
-                className="group/label text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              >
-                <CollapsibleTrigger>
-                  {item.title}{" "}
-                  <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                </CollapsibleTrigger>
-              </SidebarGroupLabel>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {item.items.map((subItem) => (
-                      <SidebarMenuItem key={subItem.title}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={location.pathname === subItem.url}
-                          onClick={() => handleNavigation(subItem.url)}
-                        >
-                          <div className="cursor-pointer">{subItem.title}</div>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
+        {filteredNavMain.map((item) => (
+          item && (
+            <Collapsible
+              key={item.title}
+              title={item.title}
+              defaultOpen={true}
+              className="group/collapsible"
+            >
+              <SidebarGroup>
+                <SidebarGroupLabel
+                  asChild
+                  className="group/label text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <CollapsibleTrigger>
+                    {item.title}{" "}
+                    <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                  </CollapsibleTrigger>
+                </SidebarGroupLabel>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {item.items.map((subItem) => (
+                        <SidebarMenuItem key={subItem.title}>
+                          <SidebarMenuButton
+                            asChild
+                            isActive={location.pathname === subItem.url}
+                            onClick={() => handleNavigation(subItem.url)}
+                          >
+                            <div className="cursor-pointer">{subItem.title}</div>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          )
         ))}
       </SidebarContent>
     </Sidebar>

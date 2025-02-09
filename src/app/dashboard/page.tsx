@@ -27,7 +27,8 @@ export default function Page() {
     totalRuang: 0,
     barangTersedia: 0,
     barangDipinjam: 0,
-    barangRusak: 0,
+    barangRusakDanHilang: 0,
+    recentActivities: [],
   });
 
   useEffect(() => {
@@ -45,9 +46,10 @@ export default function Page() {
           totalBarang: response.data.total_inventaris,
           totalPegawai: response.data.total_pegawai,
           totalRuang: response.data.total_ruang,
-          barangTersedia: 35,
-          barangDipinjam: 15,
-          barangRusak: 10,
+          barangTersedia: response.data.barang_tersedia,
+          barangDipinjam: response.data.barang_dipinjam,
+          barangRusakDanHilang: response.data.barang_rusak_dan_hilang,
+          recentActivities: response.data.riwayat_terbaru,
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -60,7 +62,7 @@ export default function Page() {
   const pieData = [
     { name: 'Tersedia', value: dashboardData.barangTersedia, fill: '#4CAF50' },
     { name: 'Dipinjam', value: dashboardData.barangDipinjam, fill: '#FFC107' },
-    { name: 'Rusak', value: dashboardData.barangRusak, fill: '#F44336' },
+    { name: 'Rusak / Hilang', value: dashboardData.barangRusakDanHilang, fill: '#F44336' },
   ];
 
   return (
@@ -117,7 +119,7 @@ export default function Page() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <PieChartComponent data={pieData} />
-            <RecentActivity />
+            <RecentActivity activities={dashboardData.recentActivities} />
           </div>
         </div>
       </SidebarInset>

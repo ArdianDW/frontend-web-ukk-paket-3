@@ -27,7 +27,8 @@ import {
 import { z } from "zod";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandItem } from "@/components/ui/command";
-import { X } from "lucide-react";
+import { X, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type Pegawai = {
   id: number;
@@ -58,6 +59,7 @@ export default function PeminjamanPage() {
     },
   });
 
+  const { toast } = useToast();
   const [pegawaiList, setPegawaiList] = useState<Pegawai[]>([]);
   const [itemList, setItemList] = useState<Inventaris[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -151,7 +153,12 @@ export default function PeminjamanPage() {
         throw new Error("Failed to submit peminjaman");
       }
 
-      window.alert("Peminjaman submitted successfully");
+      toast({
+        title: "Peminjaman Berhasil",
+        description: "Peminjaman telah berhasil disubmit.",
+        action: <CheckCircle className="h-6 w-6 text-green-500" />,
+      });
+
       form.reset(); 
     } catch (error) {
       console.error("Error submitting peminjaman:", error);

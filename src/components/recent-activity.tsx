@@ -14,40 +14,20 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-const recentActivities = [
-  {
-    dateBorrowed: "01/01/2023",
-    itemName: "Laptop",
-    borrowerName: "Ady",
-    activity: "Meminjam",
-  },
-  {
-    dateBorrowed: "02/01/2023",
-    itemName: "Proyektor",
-    borrowerName: "Joko",
-    activity: "Mengembalikan",
-  },
-  {
-    dateBorrowed: "03/01/2023",
-    itemName: "Kamera",
-    borrowerName: "Reza",
-    activity: "Meminjam",
-  },
-  {
-    dateBorrowed: "04/01/2023",
-    itemName: "Tablet",
-    borrowerName: "Rafi",
-    activity: "Mengembalikan",
-  },
-  {
-    dateBorrowed: "05/01/2023",
-    itemName: "Printer",
-    borrowerName: "Eko",
-    activity: "Meminjam",
-  },
-]
+type RecentActivityProps = {
+  activities: Array<{
+    id: number;
+    nama_peminjam: string;
+    jenis_barang: string;
+    nama_barang: string;
+    jumlah_barang: number;
+    ruang: string;
+    tanggal_peminjaman: string;
+    status: string;
+  }>
+}
 
-export function RecentActivity() {
+export function RecentActivity({ activities }: RecentActivityProps) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
@@ -58,19 +38,19 @@ export function RecentActivity() {
           <TableCaption>Daftar aktivitas peminjaman terbaru.</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[150px]">Tanggal Dipinjam</TableHead>
+              <TableHead>Tanggal Peminjaman</TableHead>
               <TableHead>Nama Barang</TableHead>
               <TableHead>Nama Peminjam</TableHead>
               <TableHead>Aktivitas</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {recentActivities.map((activity, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">{activity.dateBorrowed}</TableCell>
-                <TableCell>{activity.itemName}</TableCell>
-                <TableCell>{activity.borrowerName}</TableCell>
-                <TableCell>{activity.activity}</TableCell>
+            {activities.map((activity) => (
+              <TableRow key={activity.id}>
+                <TableCell className="font-medium">{activity.tanggal_peminjaman}</TableCell>
+                <TableCell>{activity.nama_barang}</TableCell>
+                <TableCell>{activity.nama_peminjam}</TableCell>
+                <TableCell>{activity.status}</TableCell>
               </TableRow>
             ))}
           </TableBody>

@@ -15,7 +15,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-type StatusName = 'tersedia' | 'dipinjam' | 'rusak';
+type StatusName = 'tersedia' | 'dipinjam' | 'rusak / hilang';
 
 const chartConfig: Record<StatusName, { label: string; color: string }> = {
   tersedia: {
@@ -26,8 +26,8 @@ const chartConfig: Record<StatusName, { label: string; color: string }> = {
     label: "Dipinjam",
     color: "hsl(var(--chart-4))",
   },
-  rusak: {
-    label: "Rusak",
+  'rusak / hilang': {
+    label: "Rusak / Hilang",
     color: "hsl(var(--chart-1))",
   },
 };

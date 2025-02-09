@@ -59,12 +59,6 @@ export function LoginForm({
               <div className="grid gap-2">
                 <div className="flex items-center">
                   <Label htmlFor="password">Kata Sandi</Label>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Lupa kata sandi?
-                  </a>
                 </div>
                 <Input
                   id="password"

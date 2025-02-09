@@ -10,6 +10,7 @@ import JenisPage from "@/app/sarpras/jenis/page";
 import RuangPage from "@/app/sarpras/ruang/page";
 import DaftarPenggunaPage from "@/app/pengguna/daftar-pengguna/page";
 import PengaturanPage from "@/app/pengguna/pengaturan/page";
+import UnauthorizedPage from "@/app/unauthorized/page";
 import UserLayout from "@/layout/UserLayout";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthGuard } from '../hooks/use-auth-guard';
@@ -46,27 +47,28 @@ const AppRoutes = createBrowserRouter([
             },
             {
                 path : "/barang",
-                element : <AuthGuard><BarangPage/></AuthGuard>
+                element : <AuthGuard requiredRole="Operator"><BarangPage/></AuthGuard>
             },
             {
                 path : "/barang/tambah-barang",
-                element : <AuthGuard><TambahBarangPage/></AuthGuard>
+                element : <AuthGuard requiredRole="Operator"><TambahBarangPage/></AuthGuard>
             },
             {
                 path : "/barang/edit-barang",
-                element : <AuthGuard><EditBarangPage/></AuthGuard>
+                element : <AuthGuard requiredRole="Operator"><EditBarangPage/></AuthGuard>
             },
+
             {
                 path : "/jenis",
-                element : <AuthGuard><JenisPage/></AuthGuard>
+                element : <AuthGuard requiredRole="Operator"><JenisPage/></AuthGuard>
             },
             {
                 path : "/ruang",
-                element : <AuthGuard><RuangPage/></AuthGuard>
+                element : <AuthGuard requiredRole="Operator"><RuangPage/></AuthGuard>
             },
             {
                 path : "/daftar-pengguna",
-                element : <AuthGuard><DaftarPenggunaPage/></AuthGuard>
+                element : <AuthGuard requiredRole="Admin"><DaftarPenggunaPage/></AuthGuard>
             },
             {
                 path : "/pengaturan",
@@ -75,6 +77,10 @@ const AppRoutes = createBrowserRouter([
             {
                 path : "/laporan-barang",
                 element : <AuthGuard><LaporanBarangPage/></AuthGuard>
+            },
+            {
+                path : "/unauthorized",
+                element : <AuthGuard><UnauthorizedPage/></AuthGuard>
             },
         ]
     }

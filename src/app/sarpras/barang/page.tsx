@@ -263,7 +263,7 @@ export default function BarangPage() {
                                 <Input type="date" {...register("tanggal_register")} placeholder="Tanggal Register" />
                                 <Input {...register("kode_inventaris")} placeholder="Kode Inventaris" />
                               </div>
-                              <DialogFooter>
+                              <DialogFooter className="mt-2">
                                 <DialogClose asChild>
                                   <Button type="button" variant="outline">Batal</Button>
                                 </DialogClose>

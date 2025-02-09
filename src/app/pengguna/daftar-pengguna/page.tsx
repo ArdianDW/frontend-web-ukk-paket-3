@@ -26,6 +26,8 @@ import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } 
 import { useState, useEffect } from "react";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { CheckCircle } from "lucide-react";
 
 interface Petugas {
   id: number;
@@ -55,6 +57,11 @@ export default function DaftarPenggunaPage() {
   const [dataLevel, setDataLevel] = useState<Level[]>([]);
   const [pegawaiForm, setPegawaiForm] = useState({ nama_pegawai: "", password: "", nip: "", alamat: "" });
   const [petugasForm, setPetugasForm] = useState({ username: "", password: "", nama_petugas: "", id_level: "" });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Petugas | Pegawai | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<Petugas | Pegawai | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -132,6 +139,11 @@ export default function DaftarPenggunaPage() {
         setDataPetugas([...dataPetugas, newPetugas]);
         setDialogOpen(false);
         setPetugasForm({ username: "", password: "", nama_petugas: "", id_level: "" });
+        toast({
+          title: "Sukses",
+          description: "Petugas berhasil ditambahkan.",
+          action: <CheckCircle className="h-6 w-6 text-green-500" />,
+        });
       } else {
         const errorData = await response.json();
         console.error("Failed to add petugas:", errorData);
@@ -167,12 +179,111 @@ export default function DaftarPenggunaPage() {
         setDataPegawai([...dataPegawai, newPegawai]);
         setDialogOpen(false);
         setPegawaiForm({ nama_pegawai: "", password: "", nip: "", alamat: "" });
+        toast({
+          title: "Sukses",
+          description: "Pegawai berhasil ditambahkan.",
+          action: <CheckCircle className="h-6 w-6 text-green-500" />,
+        });
       } else {
         const errorData = await response.json();
         console.error("Failed to add pegawai:", errorData);
       }
     } catch (error) {
       console.error("Error adding pegawai:", error);
+    }
+  };
+
+  const handleEditClick = (user: Petugas | Pegawai) => {
+    setSelectedUser(user);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem("access_token");
+
+    if (!token || !selectedUser) {
+      console.error("Access token tidak ditemukan atau pengguna tidak dipilih");
+      return;
+    }
+
+    try {
+      const endpoint = selectedUser.hasOwnProperty('nama_petugas') ? 'petugas' : 'pegawai';
+      const response = await fetch(`http://127.0.0.1:8000/api/${endpoint}/${selectedUser.id}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(selectedUser),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        if (endpoint === 'petugas') {
+          setDataPetugas(dataPetugas.map(user => user.id === updatedUser.id ? updatedUser : user));
+        } else {
+          setDataPegawai(dataPegawai.map(user => user.id === updatedUser.id ? updatedUser : user));
+        }
+        setEditDialogOpen(false);
+        setSelectedUser(null);
+        toast({
+          title: "Sukses",
+          description: "Pengguna berhasil diedit.",
+          action: <CheckCircle className="h-6 w-6 text-green-500" />,
+        });
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to update user:", errorData);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+    }
+  };
+
+  const handleDeleteClick = (user: Petugas | Pegawai) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      console.error("Access token tidak ditemukan");
+      return;
+    }
+
+    try {
+      const endpoint = userToDelete.hasOwnProperty('nama_petugas') ? 'petugas' : 'pegawai';
+      const response = await fetch(`http://127.0.0.1:8000/api/${endpoint}/${userToDelete.id}/`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        if (endpoint === 'petugas') {
+          setDataPetugas(dataPetugas.filter(user => user.id !== userToDelete.id));
+        } else {
+          setDataPegawai(dataPegawai.filter(user => user.id !== userToDelete.id));
+        }
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+        toast({
+          title: "Sukses",
+          description: "Pengguna berhasil dihapus.",
+          action: <CheckCircle className="h-6 w-6 text-green-500" />,
+        });
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to delete user:", errorData);
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
     }
   };
 
@@ -344,10 +455,10 @@ export default function DaftarPenggunaPage() {
                         <TableCell className="text-sm">{petugas.level_name}</TableCell>
                         <TableCell className="text-sm">
                           <div className="flex space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => console.log(`Edit ${petugas.nama_petugas}`)}>
+                            <Button variant="outline" size="sm" onClick={() => handleEditClick(petugas)}>
                               Edit
                             </Button>
-                            <Button variant="destructive" size="sm" onClick={() => console.log(`Hapus ${petugas.nama_petugas}`)}>
+                            <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(petugas)}>
                               Hapus
                             </Button>
                           </div>
@@ -377,10 +488,10 @@ export default function DaftarPenggunaPage() {
                         <TableCell className="text-sm">{pegawai.alamat}</TableCell>
                         <TableCell className="text-sm">
                           <div className="flex space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => console.log(`Edit ${pegawai.nama_pegawai}`)}>
+                            <Button variant="outline" size="sm" onClick={() => handleEditClick(pegawai)}>
                               Edit
                             </Button>
-                            <Button variant="destructive" size="sm" onClick={() => console.log(`Hapus ${pegawai.nama_pegawai}`)}>
+                            <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(pegawai)}>
                               Hapus
                             </Button>
                           </div>
@@ -394,6 +505,135 @@ export default function DaftarPenggunaPage() {
           </div>
         </div>
       </SidebarInset>
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent>
+          <DialogTitle>Edit Pengguna</DialogTitle>
+          <DialogDescription>
+            {selectedUser && (
+              <form className="space-y-4" onSubmit={handleEditSubmit}>
+                {selectedUser.hasOwnProperty('nama_petugas') ? (
+                  <>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">Username</label>
+                      <Input
+                        type="text"
+                        name="username"
+                        value={selectedUser.username}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, username: e.target.value })}
+                        placeholder="Username"
+                        className="flex-1 mb-2"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">Password</label>
+                      <Input
+                        type="password"
+                        name="password"
+                        onChange={(e) => setSelectedUser({ ...selectedUser, password: e.target.value })}
+                        placeholder="Password"
+                        className="flex-1 mb-2"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">Nama</label>
+                      <Input
+                        type="text"
+                        name="nama_petugas"
+                        value={selectedUser.nama_petugas}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, nama_petugas: e.target.value })}
+                        placeholder="Nama"
+                        className="flex-1 mb-2"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">Level</label>
+                      <Select
+                        name="id_level"
+                        value={(selectedUser as Petugas).id_level}
+                        onValueChange={(value) => setSelectedUser({ ...selectedUser, id_level: value })}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Pilih Level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {dataLevel.map((level) => (
+                            <SelectItem key={level.id} value={level.id.toString()}>
+                              {level.nama_level}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">Nama</label>
+                      <Input
+                        type="text"
+                        name="nama_pegawai"
+                        value={selectedUser.nama_pegawai}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, nama_pegawai: e.target.value })}
+                        placeholder="Nama"
+                        className="flex-1 mb-2"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">Password</label>
+                      <Input
+                        type="password"
+                        name="password"
+                        onChange={(e) => setSelectedUser({ ...selectedUser, password: e.target.value })}
+                        placeholder="Password"
+                        className="flex-1 mb-2"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">NIP</label>
+                      <Input
+                        type="text"
+                        name="nip"
+                        value={selectedUser.nip}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, nip: e.target.value })}
+                        placeholder="NIP"
+                        className="flex-1 mb-2"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">Alamat</label>
+                      <Input
+                        type="text"
+                        name="alamat"
+                        value={selectedUser.alamat}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, alamat: e.target.value })}
+                        placeholder="Alamat"
+                        className="flex-1 mb-2"
+                      />
+                    </div>
+                  </>
+                )}
+                <Button type="submit">Simpan</Button>
+              </form>
+            )}
+          </DialogDescription>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogTitle>Konfirmasi Hapus</DialogTitle>
+          <DialogDescription>
+            Apakah Anda yakin ingin menghapus pengguna ini?
+          </DialogDescription>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Batal
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              Hapus
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }
