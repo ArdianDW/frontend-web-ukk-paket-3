@@ -96,17 +96,17 @@ export default function Page() {
               </div>
             </div>
             <div className="h-20 rounded-lg bg-muted/50 flex items-center justify-start p-4">
-              <Box className="mr-4 size-6" />
-              <div>
-                <h2 className="text-lg font-semibold">Total Barang</h2>
-                <p className="text-xl">{dashboardData.totalBarang}</p>
-              </div>
-            </div>
-            <div className="h-20 rounded-lg bg-muted/50 flex items-center justify-start p-4">
               <User className="mr-4 size-6" />
               <div>
                 <h2 className="text-lg font-semibold">Total Pegawai</h2>
                 <p className="text-xl">{dashboardData.totalPegawai}</p>
+              </div>
+            </div>
+            <div className="h-20 rounded-lg bg-muted/50 flex items-center justify-start p-4">
+              <Box className="mr-4 size-6" />
+              <div>
+                <h2 className="text-lg font-semibold">Total Barang</h2>
+                <p className="text-xl">{dashboardData.totalBarang}</p>
               </div>
             </div>
             <div className="h-20 rounded-lg bg-muted/50 flex items-center justify-start p-4">

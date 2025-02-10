@@ -55,7 +55,14 @@ export default function DaftarPenggunaPage() {
   const [dataPetugas, setDataPetugas] = useState<Petugas[]>([]);
   const [dataPegawai, setDataPegawai] = useState<Pegawai[]>([]);
   const [dataLevel, setDataLevel] = useState<Level[]>([]);
-  const [pegawaiForm, setPegawaiForm] = useState({ nama_pegawai: "", password: "", nip: "", alamat: "" });
+  const [pegawaiForm, setPegawaiForm] = useState({
+    username: "",
+    password: "",
+    nama_pegawai: "",
+    nip: "",
+    alamat: "",
+    id_level: "3",
+  });
   const [petugasForm, setPetugasForm] = useState({ username: "", password: "", nama_petugas: "", id_level: "" });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<Petugas | Pegawai | null>(null);
@@ -178,7 +185,7 @@ export default function DaftarPenggunaPage() {
         const newPegawai = await response.json();
         setDataPegawai([...dataPegawai, newPegawai]);
         setDialogOpen(false);
-        setPegawaiForm({ nama_pegawai: "", password: "", nip: "", alamat: "" });
+        setPegawaiForm({ username: "", password: "", nama_pegawai: "", nip: "", alamat: "", id_level: "3" });
         toast({
           title: "Sukses",
           description: "Pegawai berhasil ditambahkan.",
@@ -380,6 +387,17 @@ export default function DaftarPenggunaPage() {
                     ) : (
                       <form className="space-y-4" onSubmit={handleSubmitPegawai}>
                         <div className="flex items-center">
+                          <label className="w-24 text-black mr-4">Username</label>
+                          <Input
+                            type="text"
+                            name="username"
+                            value={pegawaiForm.username}
+                            onChange={handleInputChange}
+                            placeholder="Username"
+                            className="flex-1 mb-2"
+                          />
+                        </div>
+                        <div className="flex items-center">
                           <label className="w-24 text-black mr-4">Nama</label>
                           <Input
                             type="text"
@@ -567,6 +585,17 @@ export default function DaftarPenggunaPage() {
                   </>
                 ) : (
                   <>
+                    <div className="flex items-center">
+                      <label className="w-24 text-black mr-4">Username</label>
+                      <Input
+                        type="text"
+                        name="username"
+                        value={selectedUser.username}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, username: e.target.value })}
+                        placeholder="Username"
+                        className="flex-1 mb-2"
+                      />
+                    </div>
                     <div className="flex items-center">
                       <label className="w-24 text-black mr-4">Nama</label>
                       <Input

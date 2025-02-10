@@ -3,10 +3,10 @@ import { Navigate } from 'react-router-dom';
 
 interface AuthGuardProps {
   children: React.ReactNode;
-  requiredRole?: string;
+  requiredRoles?: string[];
 }
 
-export const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) => {
+export const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRoles }) => {
   const accessToken = localStorage.getItem('access_token');
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = userData.level;
@@ -15,7 +15,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children, requiredRole }) 
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && userRole !== requiredRole) {
+  if (requiredRoles && !requiredRoles.includes(userRole)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

@@ -15,6 +15,11 @@ import UserLayout from "@/layout/UserLayout";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthGuard } from '../hooks/use-auth-guard';
 import LaporanBarangPage from "@/app/laporan/laporan-barang/page";
+import PegawaiHomePage from "@/app/home-pegawai/page";
+import BarangPegawaiPage from "@/app/barang-pegawai/page";
+import RiwayatPegawaiPage from "@/app/riwayat-pegawai/page";
+// import PegawaiPage2 from "@/app/pegawai/page2/page";
+// import PegawaiPage3 from "@/app/pegawai/page3/page";
 
 const AppRoutes = createBrowserRouter([
     {
@@ -31,56 +36,72 @@ const AppRoutes = createBrowserRouter([
             },
             {
                 path : "/dashboard",
-                element : <AuthGuard><DashboardPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><DashboardPage/></AuthGuard>
             },
             {
                 path : "/peminjaman",
-                element : <AuthGuard><PeminjamanPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><PeminjamanPage/></AuthGuard>
             },
             {
                 path : "/pengembalian",
-                element : <AuthGuard><PengembalianPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><PengembalianPage/></AuthGuard>
             },
             {
                 path : "/riwayat",
-                element : <AuthGuard><RiwayatPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><RiwayatPage/></AuthGuard>
             },
             {
                 path : "/barang",
-                element : <AuthGuard requiredRole="Operator"><BarangPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Operator"]}><BarangPage/></AuthGuard>
             },
             {
                 path : "/barang/tambah-barang",
-                element : <AuthGuard requiredRole="Operator"><TambahBarangPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Operator"]}><TambahBarangPage/></AuthGuard>
             },
             {
                 path : "/barang/edit-barang",
-                element : <AuthGuard requiredRole="Operator"><EditBarangPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Operator"]}><EditBarangPage/></AuthGuard>
             },
 
             {
                 path : "/jenis",
-                element : <AuthGuard requiredRole="Operator"><JenisPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Operator"]}><JenisPage/></AuthGuard>
             },
             {
                 path : "/ruang",
-                element : <AuthGuard requiredRole="Operator"><RuangPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Operator"]}><RuangPage/></AuthGuard>
             },
             {
                 path : "/daftar-pengguna",
-                element : <AuthGuard requiredRole="Admin"><DaftarPenggunaPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Admin"]}><DaftarPenggunaPage/></AuthGuard>
             },
             {
                 path : "/pengaturan",
-                element : <AuthGuard><PengaturanPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><PengaturanPage/></AuthGuard>
             },
             {
                 path : "/laporan-barang",
-                element : <AuthGuard><LaporanBarangPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Admin"]}><LaporanBarangPage/></AuthGuard>
             },
             {
+                path : "/pegawai",
+                element : <AuthGuard requiredRoles={["Pegawai"]}><PegawaiHomePage /></AuthGuard>
+            },
+            {
+                path : "/pegawai/barang",
+                element : <AuthGuard requiredRoles={["Pegawai"]}><BarangPegawaiPage /></AuthGuard>
+            },
+            {
+                path : "/pegawai/riwayat",
+                element : <AuthGuard requiredRoles={["Pegawai"]}><RiwayatPegawaiPage /></AuthGuard>
+            },
+            // {
+            //     path : "/pegawai/page3",
+            //     element : <AuthGuard requiredRole="Pegawai"><PegawaiPage3 /></AuthGuard>
+            // },
+            {
                 path : "/unauthorized",
-                element : <AuthGuard><UnauthorizedPage/></AuthGuard>
+                element : <UnauthorizedPage/>
             },
         ]
     }

@@ -26,7 +26,14 @@ export function LoginForm({
     if (error) {
       setErrorMessage(error.non_field_errors?.[0] || 'Login failed');
     } else {
-      navigate('/dashboard');
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      const userRole = userData.level;
+
+      if (userRole === 'Pegawai') {
+        navigate('/pegawai');
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 

@@ -268,11 +268,11 @@ export default function PengembalianPage() {
                               Kembalikan
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="max-w-lg max-h-[80vh] overflow-hidden">
+                          <AlertDialogContent className="max-w-lg max-h-[80vh] overflow-hidden ml-0.5">
                             <AlertDialogHeader>
                               <AlertDialogTitle>Detail Barang</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Berikut adalah detail barang yang dipinjam:
+                                Silahkan kondisi barang yang akan dikemablikan:
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <ScrollArea className="max-h-60">
@@ -285,7 +285,7 @@ export default function PengembalianPage() {
                                     setIsIndividualCondition(true);
                                   }
                                 }}>
-                                  <SelectTrigger className="w-48 pl-2">
+                                  <SelectTrigger className="w-48 pl-2 ml-0.5 mb-2">
                                     <SelectValue placeholder="Pilih Kondisi Barang" />
                                   </SelectTrigger>
                                   <SelectContent>
@@ -294,7 +294,7 @@ export default function PengembalianPage() {
                                   </SelectContent>
                                 </Select>
                                 {barangDetail.map((detail, barangIndex) => (
-                                  <div key={barangIndex} className="mb-2">
+                                  <div key={barangIndex} className="mb-2 ml-0.5">
                                     <strong>Nama Barang:</strong> {detail.nama_barang}<br />
                                     <strong>Jenis Barang:</strong> {detail.jenis_barang}<br />
                                     <strong>Ruang:</strong> {detail.ruang}<br />
