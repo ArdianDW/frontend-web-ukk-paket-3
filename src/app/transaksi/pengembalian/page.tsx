@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Table,
@@ -43,6 +43,15 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Input } from "@/components/ui/input";
 
 type BarangDipinjam = {
   nama_barang: string;
@@ -71,6 +80,9 @@ export default function PengembalianPage() {
   const [barangConditions, setBarangConditions] = useState<{ [key: number]: string[] }>({});
   const [isIndividualCondition, setIsIndividualCondition] = useState<boolean>(false);
   const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const fetchData = async () => {
     try {
@@ -203,6 +215,27 @@ export default function PengembalianPage() {
     }
   };
 
+  // Filter data berdasarkan pencarian
+  const filteredData = dataPeminjaman.filter((peminjaman) =>
+    peminjaman.nama_peminjam.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Hitung data untuk paginasi
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset halaman ke 1 saat pencarian berubah
+  };
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -227,6 +260,15 @@ export default function PengembalianPage() {
         <div className="flex flex-1 flex-col gap-2 p-4">
           <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
             <h1 className="text-3xl font-bold mb-6">Daftar Peminjaman Barang</h1>
+            <div className="flex justify-between items-center mb-6">
+              <Input
+                type="text"
+                placeholder="Cari Peminjam..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-1/2"
+              />
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -239,11 +281,11 @@ export default function PengembalianPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dataPeminjaman.map((peminjaman, index) => {
+                {currentData.map((peminjaman, index) => {
                   const totalJumlah = peminjaman.barang_dipinjam.reduce((total, barang) => total + barang.jumlah, 0);
                   return (
                     <TableRow key={peminjaman.id}>
-                      <TableCell className="text-sm">{index + 1}</TableCell>
+                      <TableCell className="text-sm">{index + 1 + indexOfFirstItem}</TableCell>
                       <TableCell className="text-sm">{peminjaman.nama_peminjam}</TableCell>
                       <TableCell className="text-sm">
                         {peminjaman.barang_dipinjam.map((barang: BarangDipinjam, idx) => (
@@ -333,6 +375,28 @@ export default function PengembalianPage() {
                 })}
               </TableBody>
             </Table>
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationPrevious
+                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                  className={currentPage === 1 ? "opacity-50 pointer-events-none" : ""}
+                />
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={i + 1 === currentPage}
+                      onClick={() => handlePageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationNext
+                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                  className={currentPage === totalPages ? "opacity-50 pointer-events-none" : ""}
+                />
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       </SidebarInset>

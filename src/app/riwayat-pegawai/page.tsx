@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -31,6 +31,7 @@ import {
 
 type BarangDipinjam = {
   nama_barang: string;
+  jumlah: number;
 };
 
 type RiwayatAktivitas = {
@@ -42,24 +43,77 @@ type RiwayatAktivitas = {
 };
 
 export default function RiwayatPegawaiPage() {
-  const [riwayatData] = useState<RiwayatAktivitas[]>([
-    {
-      id: 1,
-      barang_dipinjam: [{ nama_barang: "Laptop" }, { nama_barang: "Proyektor" }],
-      tanggal_meminjam: "2023-10-01",
-      tanggal_mengembalikan: "2023-10-10",
-      keterangan: "Dikembalikan tepat waktu",
-    },
-    {
-      id: 2,
-      barang_dipinjam: [{ nama_barang: "Kamera" }],
-      tanggal_meminjam: "2023-10-05",
-      tanggal_mengembalikan: null,
-      keterangan: "Belum dikembalikan",
-    },
-  ]);
+  const [riwayatData, setRiwayatData] = useState<RiwayatAktivitas[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    const fetchPegawaiIdAndData = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const userData = localStorage.getItem("user");
+        const userId = userData ? JSON.parse(userData).id : null;
+
+        if (!userId) {
+          console.error("User ID not found in localStorage");
+          return;
+        }
+
+        // Fetch pegawai ID
+        const pegawaiResponse = await fetch(`http://127.0.0.1:8000/api/pegawai/petugas/${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!pegawaiResponse.ok) {
+          console.error("Failed to fetch pegawai ID:", pegawaiResponse.statusText);
+          return;
+        }
+
+        const pegawaiData = await pegawaiResponse.json();
+        const pegawaiId = pegawaiData.id; // Asumsikan pegawai ID ada di pegawaiData.id
+
+        const response = await fetch(`http://127.0.0.1:8000/api/riwayat-aktivitas/user/${pegawaiId}/`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Failed to fetch data:", response.statusText);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("API Response:", data); // Log respons untuk debugging
+
+        if (Array.isArray(data)) {
+          const formattedData = data.map((item: any) => ({
+            id: item.id,
+            barang_dipinjam: item.barang_dipinjam.map((barang: any) => ({
+              nama_barang: barang.nama_barang,
+              jumlah: barang.jumlah,
+            })),
+            tanggal_meminjam: item.tanggal_meminjam,
+            tanggal_mengembalikan: item.tanggal_mengembalikan,
+            keterangan: item.keterangan,
+          }));
+          setRiwayatData(formattedData);
+        } else {
+          console.error("Data is not an array:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchPegawaiIdAndData();
+  }, []);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -113,7 +167,7 @@ export default function RiwayatPegawaiPage() {
                     <TableCell className="text-sm">
                       {riwayat.barang_dipinjam.map((barang, idx) => (
                         <div key={idx}>
-                          - {barang.nama_barang}
+                          {barang.nama_barang} ({barang.jumlah})
                         </div>
                       ))}
                     </TableCell>

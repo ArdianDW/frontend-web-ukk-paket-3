@@ -7,6 +7,8 @@ import LoginImg from "@/assets/login_img.jpg"
 import { useAuth } from '../hooks/use-auth'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useToast } from "@/hooks/use-toast"
+import { CheckCircle, CircleX } from "lucide-react"
 
 export function LoginForm({
   className,
@@ -15,6 +17,7 @@ export function LoginForm({
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -25,9 +28,21 @@ export function LoginForm({
     const error = await handleLogin(username, password);
     if (error) {
       setErrorMessage(error.non_field_errors?.[0] || 'Login failed');
+      toast({
+        title: "Login Gagal",
+        description: error.non_field_errors?.[0] || 'Login failed',
+        variant: "destructive",
+        action: <CircleX className="h-6 w-6 text-red-500" />,
+      });
     } else {
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       const userRole = userData.level;
+
+      toast({
+        title: "Login Berhasil",
+        description: "Anda berhasil masuk.",
+        action: <CheckCircle className="h-6 w-6 text-green-500" />,
+      });
 
       if (userRole === 'Pegawai') {
         navigate('/pegawai');
@@ -77,6 +92,12 @@ export function LoginForm({
               <Button type="submit" className="w-full">
                 Masuk
               </Button>
+              <div className="mt-4 text-center text-sm">
+                  Tidak punya akun?{" "}
+              <a href="/register" className="underline underline-offset-4">
+                  Buat akun baru   
+              </a>
+            </div>
             </div>
           </form>
           <div className="relative hidden bg-muted md:block">

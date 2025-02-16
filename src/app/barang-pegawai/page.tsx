@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { AppSidebarPegawai } from "@/components/app-sidebar-pegawai"; // Import sidebar pegawai
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -24,19 +24,110 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input"; // Import input component
+import axios from "axios";
 
 const BarangPegawaiPage = () => {
-  const availableItems = [
-    { id: 1, nama: "Laptop", jenis: "Elektronik", ruang: "Lab Komputer", jumlah: 10, kode: "LB001" },
-    { id: 2, nama: "Proyektor", jenis: "Elektronik", ruang: "Ruang Rapat", jumlah: 5, kode: "PJ002" },
-  ];
-
+  const [availableItems, setAvailableItems] = useState<any[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [jumlahPinjam, setJumlahPinjam] = useState<number>(1);
+  const [pegawaiId, setPegawaiId] = useState<number | null>(null);
 
-  const handlePeminjaman = () => {
-    if (selectedItemId !== null) {
-      console.log(`Mengajukan peminjaman untuk barang dengan ID: ${selectedItemId}, Jumlah: ${jumlahPinjam}`);
+  useEffect(() => {
+    const fetchAvailableItems = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          console.error("Access token not found in localStorage");
+          return;
+        }
+
+        const response = await fetch("http://127.0.0.1:8000/api/inventaris/baik/", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Failed to fetch available items:", response.statusText);
+          return;
+        }
+        const data = await response.json();
+        console.log("Fetched Items:", data); // Log data untuk debugging
+        setAvailableItems(data);
+      } catch (error) {
+        console.error("Error fetching available items:", error);
+      }
+    };
+
+    const fetchPegawaiId = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const userData = localStorage.getItem("user");
+        const userId = userData ? JSON.parse(userData).id : null;
+
+        if (!userId) {
+          console.error("User ID not found in localStorage");
+          return;
+        }
+
+        const response = await fetch(`http://127.0.0.1:8000/api/pegawai/petugas/${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Failed to fetch pegawai ID:", response.statusText);
+          return;
+        }
+
+        const data = await response.json();
+        setPegawaiId(data.id);
+      } catch (error) {
+        console.error("Error fetching pegawai ID:", error);
+      }
+    };
+
+    fetchAvailableItems();
+    fetchPegawaiId();
+  }, []);
+
+  const handlePeminjaman = async () => {
+    if (selectedItemId !== null && pegawaiId !== null) {
+      try {
+        const token = localStorage.getItem("access_token");
+        const requestBody = {
+          id_pegawai: pegawaiId,
+          details: [
+            {
+              id_inventaris: selectedItemId,
+              jumlah: jumlahPinjam,
+            },
+          ],
+        };
+
+        console.log("Request body for peminjaman:", requestBody);
+
+        const response = await axios.post("http://127.0.0.1:8000/api/peminjaman/pegawai/", requestBody, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 201) {
+          console.log("Peminjaman berhasil diajukan.");
+          // Optionally, refresh the data or update the UI to reflect the change
+        } else {
+          console.error("Failed to submit peminjaman:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error submitting peminjaman:", error);
+      }
     }
   };
 
@@ -81,10 +172,10 @@ const BarangPegawaiPage = () => {
                   <TableRow key={item.id}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{item.nama}</TableCell>
-                    <TableCell>{item.jenis}</TableCell>
-                    <TableCell>{item.ruang}</TableCell>
+                    <TableCell>{item.nama_jenis}</TableCell>
+                    <TableCell>{item.nama_ruang}</TableCell>
                     <TableCell>{item.jumlah}</TableCell>
-                    <TableCell>{item.kode}</TableCell>
+                    <TableCell>{item.kode_inventaris}</TableCell>
                     <TableCell>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>

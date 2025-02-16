@@ -312,7 +312,7 @@ export default function PeminjamanPage() {
                     )}
                   />
                   <Button type="submit" className="w-full">
-                    Submit
+                    Pinjam
                   </Button>
                 </form>
               </Form>

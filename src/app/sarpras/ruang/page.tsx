@@ -35,6 +35,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 type Ruang = {
   id: number;
@@ -49,6 +57,9 @@ export default function RuangPage() {
   const [selectedRuang, setSelectedRuang] = useState<Ruang | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [ruangToDelete, setRuangToDelete] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const accessToken = localStorage.getItem("access_token");
 
@@ -122,6 +133,27 @@ export default function RuangPage() {
     setDeleteDialogOpen(true);
   };
 
+  // Filter data berdasarkan pencarian
+  const filteredData = dataRuang.filter((ruang) =>
+    ruang.nama_ruang.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Hitung data untuk paginasi
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset halaman ke 1 saat pencarian berubah
+  };
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -147,6 +179,13 @@ export default function RuangPage() {
           <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold">Daftar Ruang Sarpras</h1>
+              <Input
+                type="text"
+                placeholder="Cari Ruang..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-1/3"
+              />
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="default" size="sm">
@@ -187,9 +226,9 @@ export default function RuangPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dataRuang.map((ruang, index) => (
+                {currentData.map((ruang, index) => (
                   <TableRow key={ruang.id}>
-                    <TableCell className="text-sm">{index + 1}</TableCell>
+                    <TableCell className="text-sm">{index + 1 + indexOfFirstItem}</TableCell>
                     <TableCell className="text-sm">{ruang.kode_ruang}</TableCell>
                     <TableCell className="text-sm">{ruang.nama_ruang}</TableCell>
                     <TableCell className="text-sm">{ruang.keterangan}</TableCell>
@@ -232,6 +271,28 @@ export default function RuangPage() {
                 ))}
               </TableBody>
             </Table>
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationPrevious
+                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                  className={currentPage === 1 ? "opacity-50 pointer-events-none" : ""}
+                />
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={i + 1 === currentPage}
+                      onClick={() => handlePageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationNext
+                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                  className={currentPage === totalPages ? "opacity-50 pointer-events-none" : ""}
+                />
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       </SidebarInset>

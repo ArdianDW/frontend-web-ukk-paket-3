@@ -1,6 +1,7 @@
 import * as React from "react";
-import { User, ChevronRight } from "lucide-react";
+import { User, ChevronRight, CheckCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 import {
   Collapsible,
@@ -41,12 +42,12 @@ const dataPegawai = {
           url: "/pegawai",
         },
         {
-            title: "Riwayat peminjaman anda",
-            url: "/pegawai/riwayat",
+          title: "Daftar Barang Tersedia",
+          url: "/pegawai/barang",
         },
         {
-            title: "List Barang",
-            url: "/pegawai/barang",
+            title: "Riwayat peminjaman anda",
+            url: "/pegawai/riwayat",
         },
       ],
     },
@@ -56,7 +57,7 @@ const dataPegawai = {
       items: [
         {
           title: "Pengaturan Pengguna",
-          url: "/pengaturan",
+          url: "/pegawai/pengaturan",
         },
       ],
     },
@@ -66,6 +67,7 @@ const dataPegawai = {
 export function AppSidebarPegawai({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
 
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
   const namaPetugas = userData.nama_petugas;
@@ -78,6 +80,11 @@ export function AppSidebarPegawai({ ...props }: React.ComponentProps<typeof Side
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    toast({
+      title: "Logout Berhasil",
+      description: "Anda telah berhasil logout.",
+      action: <CheckCircle className="h-6 w-6 text-green-500" />,
+    });
     navigate('/login');
   };
 

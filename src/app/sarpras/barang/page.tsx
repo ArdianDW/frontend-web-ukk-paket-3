@@ -53,6 +53,14 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 
 export default function BarangPage() {
   const navigate = useNavigate();
@@ -83,6 +91,10 @@ export default function BarangPage() {
   const [jenisOptions, setJenisOptions] = useState<Jenis[]>([]);
   const [ruangOptions, setRuangOptions] = useState<Ruang[]>([]);
   const [selectedBarang, setSelectedBarang] = useState<Barang | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [filterKondisi, setFilterKondisi] = useState("all");
 
   const accessToken = localStorage.getItem("access_token");
 
@@ -206,6 +218,29 @@ export default function BarangPage() {
     }
   }, [selectedBarang, reset]);
 
+  // Filter data berdasarkan pencarian dan kondisi
+  const filteredData = dataBarang.filter((barang) => {
+    const matchesSearch = barang.nama.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesKondisi = filterKondisi === "all" || barang.kondisi === filterKondisi;
+    return matchesSearch && matchesKondisi;
+  });
+
+  // Hitung data untuk paginasi
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset halaman ke 1 saat pencarian berubah
+  };
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -217,7 +252,7 @@ export default function BarangPage() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                <BreadcrumbLink href="/">Beranda</BreadcrumbLink>
+                  <BreadcrumbLink href="/">Beranda</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -231,9 +266,26 @@ export default function BarangPage() {
           <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold">Daftar Barang Sarpras</h1>
-              {/* <Button variant="default" size="sm" onClick={() => navigate("/barang/tambah-barang")}>
-                Tambah Barang
-              </Button> */}
+              <div className="flex gap-4">
+                <Input
+                  type="text"
+                  placeholder="Cari Barang..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="w-1/1"
+                />
+                <Select onValueChange={setFilterKondisi}>
+                  <SelectTrigger className="w-1/1">
+                    <SelectValue placeholder="Filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua</SelectItem>
+                    <SelectItem value="baik">Baik</SelectItem>
+                    <SelectItem value="rusak">Rusak</SelectItem>
+                    <SelectItem value="hilang">Hilang</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="default" size="sm">
@@ -306,14 +358,22 @@ export default function BarangPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dataBarang.map((barang, index) => (
+                {currentData.map((barang, index) => (
                   <TableRow key={barang.id}>
-                    <TableCell className="text-sm">{index + 1}</TableCell>
+                    <TableCell className="text-sm">{index + 1 + indexOfFirstItem}</TableCell>
                     <TableCell className="text-sm">{barang.nama}</TableCell>
                     <TableCell className="text-sm">{barang.nama_jenis}</TableCell>
                     <TableCell className="text-sm">{barang.jumlah}</TableCell>
                     <TableCell className="text-sm">{barang.nama_ruang}</TableCell>
-                    <TableCell className="text-sm">{barang.kondisi}</TableCell>
+                    <TableCell className="text-sm">
+                      <span
+                        className={`px-2 py-1 rounded ${
+                          barang.kondisi === "rusak" ? "bg-red-500 text-white" : "bg-green-500 text-white"
+                        }`}
+                      >
+                        {barang.kondisi}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-sm">{barang.keterangan}</TableCell>
                     <TableCell className="text-sm">{barang.tanggal_register}</TableCell>
                     <TableCell className="text-sm">{barang.kode_inventaris}</TableCell>
@@ -401,6 +461,28 @@ export default function BarangPage() {
                 ))}
               </TableBody>
             </Table>
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationPrevious
+                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                  className={currentPage === 1 ? "opacity-50 pointer-events-none" : ""}
+                />
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={i + 1 === currentPage}
+                      onClick={() => handlePageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationNext
+                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                  className={currentPage === totalPages ? "opacity-50 pointer-events-none" : ""}
+                />
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       </SidebarInset>

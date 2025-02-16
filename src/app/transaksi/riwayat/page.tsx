@@ -135,7 +135,15 @@ export default function RiwayatPage() {
                         </TableCell>
                         <TableCell className="text-sm">{riwayat.tanggal_meminjam}</TableCell>
                         <TableCell className="text-sm">{riwayat.tanggal_mengembalikan || "Belum Dikembalikan"}</TableCell>
-                        <TableCell className="text-sm">{riwayat.keterangan}</TableCell>
+                        <TableCell className="text-sm">
+                          <span
+                            className={`px-2 py-1 rounded ${
+                              riwayat.keterangan === "Meminjam" ? "bg-red-500 text-white" : "bg-green-500 text-white"
+                            }`}
+                          >
+                            {riwayat.keterangan}
+                          </span>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

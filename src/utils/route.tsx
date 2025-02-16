@@ -2,6 +2,7 @@ import LoginPage from "@/app/login/page";
 import DashboardPage from "@/app/dashboard/page";
 import PeminjamanPage from "@/app/transaksi/peminjaman/page";
 import PengembalianPage from "@/app/transaksi/pengembalian/page";
+import PengajuanPage from "@/app/transaksi/pengajuan/page";
 import RiwayatPage from "@/app/transaksi/riwayat/page";
 import BarangPage from "@/app/sarpras/barang/page";
 import TambahBarangPage from "@/app/sarpras/barang/tambah-barang-page";
@@ -18,8 +19,8 @@ import LaporanBarangPage from "@/app/laporan/laporan-barang/page";
 import PegawaiHomePage from "@/app/home-pegawai/page";
 import BarangPegawaiPage from "@/app/barang-pegawai/page";
 import RiwayatPegawaiPage from "@/app/riwayat-pegawai/page";
-// import PegawaiPage2 from "@/app/pegawai/page2/page";
-// import PegawaiPage3 from "@/app/pegawai/page3/page";
+import PengaturanPegawaiPage from "@/app/pengaturan-pegawai/page";
+import RegisterPage from "@/app/register/page";
 
 const AppRoutes = createBrowserRouter([
     {
@@ -35,6 +36,10 @@ const AppRoutes = createBrowserRouter([
                 element : <LoginPage/>
             },
             {
+                path : "/register",
+                element: <RegisterPage/>
+            },
+            {
                 path : "/dashboard",
                 element : <AuthGuard requiredRoles={["Admin", "Operator"]}><DashboardPage/></AuthGuard>
             },
@@ -45,6 +50,10 @@ const AppRoutes = createBrowserRouter([
             {
                 path : "/pengembalian",
                 element : <AuthGuard requiredRoles={["Admin", "Operator"]}><PengembalianPage/></AuthGuard>
+            },
+            {
+                path : "/pengajuan",
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><PengajuanPage/></AuthGuard>
             },
             {
                 path : "/riwayat",
@@ -58,10 +67,10 @@ const AppRoutes = createBrowserRouter([
                 path : "/barang/tambah-barang",
                 element : <AuthGuard requiredRoles={["Operator"]}><TambahBarangPage/></AuthGuard>
             },
-            {
-                path : "/barang/edit-barang",
-                element : <AuthGuard requiredRoles={["Operator"]}><EditBarangPage/></AuthGuard>
-            },
+            // {
+            //     path : "/barang/edit-barang",
+            //     element : <AuthGuard requiredRoles={["Operator"]}><EditBarangPage/></AuthGuard>
+            // },
 
             {
                 path : "/jenis",
@@ -81,7 +90,7 @@ const AppRoutes = createBrowserRouter([
             },
             {
                 path : "/laporan-barang",
-                element : <AuthGuard requiredRoles={["Admin"]}><LaporanBarangPage/></AuthGuard>
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><LaporanBarangPage/></AuthGuard>
             },
             {
                 path : "/pegawai",
@@ -95,10 +104,10 @@ const AppRoutes = createBrowserRouter([
                 path : "/pegawai/riwayat",
                 element : <AuthGuard requiredRoles={["Pegawai"]}><RiwayatPegawaiPage /></AuthGuard>
             },
-            // {
-            //     path : "/pegawai/page3",
-            //     element : <AuthGuard requiredRole="Pegawai"><PegawaiPage3 /></AuthGuard>
-            // },
+            {
+                path: "/pegawai/pengaturan",
+                element: <AuthGuard requiredRoles={["Pegawai"]}><PengaturanPegawaiPage/></AuthGuard>
+            },
             {
                 path : "/unauthorized",
                 element : <UnauthorizedPage/>

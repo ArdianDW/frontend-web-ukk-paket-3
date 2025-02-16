@@ -35,6 +35,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 type Jenis = {
   id: number;
@@ -49,6 +57,9 @@ export default function JenisPage() {
   const [selectedJenis, setSelectedJenis] = useState<Jenis | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [jenisToDelete, setJenisToDelete] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const accessToken = localStorage.getItem("access_token");
 
@@ -122,6 +133,27 @@ export default function JenisPage() {
     setDeleteDialogOpen(true);
   };
 
+  // Filter data berdasarkan pencarian
+  const filteredData = dataJenis.filter((jenis) =>
+    jenis.nama_jenis.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Hitung data untuk paginasi
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentData = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset halaman ke 1 saat pencarian berubah
+  };
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -147,6 +179,13 @@ export default function JenisPage() {
           <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-3xl font-bold">Daftar Jenis Sarpras</h1>
+              <Input
+                type="text"
+                placeholder="Cari Jenis..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-1/3"
+              />
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="default" size="sm">
@@ -187,9 +226,9 @@ export default function JenisPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dataJenis.map((jenis, index) => (
+                {currentData.map((jenis, index) => (
                   <TableRow key={jenis.id}>
-                    <TableCell className="text-sm">{index + 1}</TableCell>
+                    <TableCell className="text-sm">{index + 1 + indexOfFirstItem}</TableCell>
                     <TableCell className="text-sm">{jenis.kode_jenis}</TableCell>
                     <TableCell className="text-sm">{jenis.nama_jenis}</TableCell>
                     <TableCell className="text-sm">{jenis.keterangan}</TableCell>
@@ -232,6 +271,28 @@ export default function JenisPage() {
                 ))}
               </TableBody>
             </Table>
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationPrevious
+                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                  className={currentPage === 1 ? "opacity-50 pointer-events-none" : ""}
+                />
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={i + 1 === currentPage}
+                      onClick={() => handlePageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationNext
+                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                  className={currentPage === totalPages ? "opacity-50 pointer-events-none" : ""}
+                />
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       </SidebarInset>
