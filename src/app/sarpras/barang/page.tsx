@@ -152,7 +152,9 @@ export default function BarangPage() {
   };
 
   const handleUpdate = (data: Barang) => {
+    console.log("Data yang dikirim:", data);
     const jenis = jenisOptions.find(j => j.nama_jenis === data.nama_jenis);
+    console.log("Jenis yang ditemukan:", jenis);
     const ruang = ruangOptions.find(r => r.nama_ruang === data.nama_ruang);
 
     const updatedData = {
@@ -182,8 +184,14 @@ export default function BarangPage() {
   };
 
   const handleAdd = (data: Barang) => {
+    console.log("Data yang dikirim:", data);
+    console.log("Jenis Options:", jenisOptions);
+    console.log("Ruang Options:", ruangOptions);
+    console.log("Nama ruang dari form:", data.nama_ruang);
     const jenis = jenisOptions.find(j => j.nama_jenis === data.nama_jenis);
+    console.log("Jenis yang ditemukan:", jenis);
     const ruang = ruangOptions.find(r => r.nama_ruang === data.nama_ruang);
+    console.log("Ruang yang ditemukan:", ruang);
 
     const newData = {
       nama: data.nama,
@@ -197,7 +205,7 @@ export default function BarangPage() {
       tanggal_register: data.tanggal_register,
     };
 
-    console.log("Request body for add:", newData);
+    console.log("Data yang diterima di handleAdd:", newData);
     axios.post("http://127.0.0.1:8000/api/inventaris/", newData, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -210,13 +218,17 @@ export default function BarangPage() {
     .catch(error => console.error("Error adding data:", error));
   };
 
-  const { register, handleSubmit, reset } = useForm<Barang>();
+  const { register, handleSubmit, reset, getValues, watch } = useForm<Barang>();
 
   useEffect(() => {
     if (selectedBarang) {
       reset(selectedBarang);
     }
   }, [selectedBarang, reset]);
+
+  useEffect(() => {
+    console.log("Current form values:", getValues());
+  }, [watch("nama_ruang")]);
 
   // Filter data berdasarkan pencarian dan kondisi
   const filteredData = dataBarang.filter((barang) => {
@@ -286,61 +298,13 @@ export default function BarangPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="default" size="sm">
-                    Tambah Barang
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Tambah Barang</DialogTitle>
-                    <DialogDescription>
-                      Masukkan detail barang baru di bawah ini.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleSubmit(handleAdd)}>
-                    <div className="space-y-4">
-                      <Input {...register("nama")} placeholder="Nama Barang" />
-                      <Select {...register("nama_jenis")}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih Jenis" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {jenisOptions.map((jenis) => (
-                            <SelectItem key={jenis.id} value={jenis.nama_jenis}>
-                              {jenis.nama_jenis}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input type="number" {...register("jumlah")} placeholder="Jumlah" />
-                      <Select {...register("nama_ruang")}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Pilih Ruang" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ruangOptions.map((ruang) => (
-                            <SelectItem key={ruang.id} value={ruang.nama_ruang}>
-                              {ruang.nama_ruang}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Input {...register("kondisi")} placeholder="Kondisi" />
-                      <Input {...register("keterangan")} placeholder="Keterangan" />
-                      <Input type="date" {...register("tanggal_register")} placeholder="Tanggal Register" />
-                      <Input {...register("kode_inventaris")} placeholder="Kode Inventaris" />
-                    </div>
-                    <DialogFooter className="mt-2">
-                      <DialogClose asChild>
-                        <Button type="button" variant="outline">Batal</Button>
-                      </DialogClose>
-                      <Button type="submit">Simpan</Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => navigate("/barang/tambah-barang")}
+              >
+                Tambah Barang
+              </Button>
             </div>
             <Table>
               <TableHeader>
@@ -368,7 +332,7 @@ export default function BarangPage() {
                     <TableCell className="text-sm">
                       <span
                         className={`px-2 py-1 rounded ${
-                          barang.kondisi === "rusak" ? "bg-red-500 text-white" : "bg-green-500 text-white"
+                          barang.kondisi === "rusak" || barang.kondisi === "hilang" ? "bg-red-500 text-white" : "bg-green-500 text-white"
                         }`}
                       >
                         {barang.kondisi}

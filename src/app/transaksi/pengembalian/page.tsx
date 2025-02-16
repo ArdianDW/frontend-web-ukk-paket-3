@@ -352,7 +352,6 @@ export default function PengembalianPage() {
                                             <SelectItem value="baik">Baik</SelectItem>
                                             <SelectItem value="rusak">Rusak</SelectItem>
                                             <SelectItem value="hilang">Hilang</SelectItem>
-                                            <SelectItem value="masih_dipinjam">Masih Dipinjam</SelectItem>
                                           </SelectContent>
                                         </Select>
                                       </div>

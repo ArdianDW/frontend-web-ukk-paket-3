@@ -21,7 +21,9 @@ import BarangPegawaiPage from "@/app/barang-pegawai/page";
 import RiwayatPegawaiPage from "@/app/riwayat-pegawai/page";
 import PengaturanPegawaiPage from "@/app/pengaturan-pegawai/page";
 import RegisterPage from "@/app/register/page";
-
+import PeminjamanFormPage from "@/app/transaksi/peminjaman/peminjaman-form-page";
+import PengajuanPeminjamanForm from "@/app/barang-pegawai/pengajuan-peminjaman-form";
+import RiwayatPengajuanPage from "@/app/riwayat-pengajuan/page";
 const AppRoutes = createBrowserRouter([
     {
         path : "/",
@@ -48,6 +50,10 @@ const AppRoutes = createBrowserRouter([
                 element : <AuthGuard requiredRoles={["Admin", "Operator"]}><PeminjamanPage/></AuthGuard>
             },
             {
+                path : "/peminjaman/form",
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><PeminjamanFormPage/></AuthGuard>
+            },
+            {
                 path : "/pengembalian",
                 element : <AuthGuard requiredRoles={["Admin", "Operator"]}><PengembalianPage/></AuthGuard>
             },
@@ -67,10 +73,10 @@ const AppRoutes = createBrowserRouter([
                 path : "/barang/tambah-barang",
                 element : <AuthGuard requiredRoles={["Operator"]}><TambahBarangPage/></AuthGuard>
             },
-            // {
-            //     path : "/barang/edit-barang",
-            //     element : <AuthGuard requiredRoles={["Operator"]}><EditBarangPage/></AuthGuard>
-            // },
+            {
+                path : "/barang/edit-barang",
+                element : <AuthGuard requiredRoles={["Operator"]}><EditBarangPage/></AuthGuard>
+            },
 
             {
                 path : "/jenis",
@@ -101,8 +107,16 @@ const AppRoutes = createBrowserRouter([
                 element : <AuthGuard requiredRoles={["Pegawai"]}><BarangPegawaiPage /></AuthGuard>
             },
             {
+                path : "/pegawai/barang/form",
+                element : <AuthGuard requiredRoles={["Pegawai"]}><PengajuanPeminjamanForm /></AuthGuard>
+            },
+            {
                 path : "/pegawai/riwayat",
                 element : <AuthGuard requiredRoles={["Pegawai"]}><RiwayatPegawaiPage /></AuthGuard>
+            },
+            {
+                path : "/pegawai/riwayat-pengajuan",
+                element : <AuthGuard requiredRoles={["Pegawai"]}><RiwayatPengajuanPage /></AuthGuard>
             },
             {
                 path: "/pegawai/pengaturan",

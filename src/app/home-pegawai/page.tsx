@@ -34,6 +34,7 @@ import {
 const PegawaiHomePage = () => {
   const [borrowedItems, setBorrowedItems] = useState<any[]>([]);
   const [pegawaiName, setPegawaiName] = useState<string>("");
+  const [selectedCondition, setSelectedCondition] = useState<string>("baik");
 
   useEffect(() => {
     const fetchPegawaiIdAndData = async () => {
@@ -102,16 +103,24 @@ const PegawaiHomePage = () => {
     fetchPegawaiIdAndData();
   }, []);
 
-  const handleReturn = async (itemId: number) => {
+  const handleReturn = async (itemId: number, itemDetails: any) => {
     try {
       const token = localStorage.getItem("access_token");
       const url = `http://127.0.0.1:8000/api/peminjaman/pegawai/${itemId}/`;
+      const requestBody = {
+        details: itemDetails.map((barang: any) => ({
+          id_inventaris: barang.id_inventaris,
+          jumlah: barang.jumlah,
+          kondisi: selectedCondition,
+        })),
+      };
       const options = {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
         },
+        body: JSON.stringify(requestBody),
       };
 
       console.log("Request URL:", url);
@@ -184,7 +193,7 @@ const PegawaiHomePage = () => {
                     <TableCell>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="default" size="sm" onClick={() => handleReturn(item.id)}>
+                          <Button variant="default" size="sm" onClick={() => handleReturn(item.id, item.barang_dipinjam)}>
                             Ajukan Pengembalian
                           </Button>
                         </AlertDialogTrigger>
@@ -196,7 +205,7 @@ const PegawaiHomePage = () => {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <div my-4>
-                            <Select>
+                            <Select onValueChange={setSelectedCondition}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Pilih kondisi barang"/>
                               </SelectTrigger>
@@ -209,7 +218,7 @@ const PegawaiHomePage = () => {
                           </div>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Batal</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleReturn(item.id)}>
+                            <AlertDialogAction onClick={() => handleReturn(item.id, item.barang_dipinjam)}>
                               Kembalikan
                             </AlertDialogAction>
                           </AlertDialogFooter>

@@ -80,26 +80,27 @@ const PengajuanPage = () => {
     fetchData();
   }, []);
 
-  const handlePeminjaman = async () => {
+  const handleApproval = async (status: string) => {
     if (selectedItemId !== null) {
       try {
         const token = localStorage.getItem("access_token");
         const response = await fetch(`http://127.0.0.1:8000/api/peminjaman/approve/${selectedItemId}/`, {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`,
           },
+          body: JSON.stringify({ status_approval: status }),
         });
 
         if (response.ok) {
-          console.log(`Pengajuan untuk barang dengan ID: ${selectedItemId} berhasil diterima.`);
+          console.log(`Pengajuan untuk barang dengan ID: ${selectedItemId} berhasil ${status}.`);
           fetchData();
         } else {
-          console.error("Gagal menerima pengajuan.");
+          console.error(`Gagal ${status} pengajuan.`);
         }
       } catch (error) {
-        console.error("Error saat menerima pengajuan:", error);
+        console.error(`Error saat ${status} pengajuan:`, error);
       }
     }
   };
@@ -201,27 +202,57 @@ const PengajuanPage = () => {
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button
-                            variant="default"
+                            variant="destructive"
                             size="sm"
                             onClick={() => {
                               setSelectedItemId(item.id);
                               setJumlahPinjam(1); // Reset jumlah pinjam setiap kali dialog dibuka
                             }}
                           >
-                            Konfirmasi
+                            Tolak
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Konfirmasi Penolakan</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Apakah Anda yakin ingin menolak pengajuan peminjaman untuk barang ini?
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleApproval("ditolak")}>
+                              Tolak
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="ml-2"
+                            onClick={() => {
+                              setSelectedItemId(item.id);
+                              setJumlahPinjam(1); // Reset jumlah pinjam setiap kali dialog dibuka
+                            }}
+                          >
+                            Terima
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>Konfirmasi Pengajuan</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Apakah Anda yakin ingin mengonfirmasi pengajuan peminjaman untuk barang ini?
+                              Apakah Anda yakin ingin menerima pengajuan peminjaman untuk barang ini?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Batal</AlertDialogCancel>
-                            <AlertDialogAction onClick={handlePeminjaman}>
-                              Konfirmasi
+                            <AlertDialogAction onClick={() => handleApproval("diterima")}>
+                              Terima
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

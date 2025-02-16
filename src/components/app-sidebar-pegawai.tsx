@@ -45,9 +45,13 @@ const dataPegawai = {
           title: "Daftar Barang Tersedia",
           url: "/pegawai/barang",
         },
+        // {
+        //     title: "Riwayat peminjaman",
+        //     url: "/pegawai/riwayat",
+        // },
         {
-            title: "Riwayat peminjaman anda",
-            url: "/pegawai/riwayat",
+            title: "Riwayat pengajuan",
+            url: "/pegawai/riwayat-pengajuan",
         },
       ],
     },
@@ -70,7 +74,7 @@ export function AppSidebarPegawai({ ...props }: React.ComponentProps<typeof Side
   const { toast } = useToast();
 
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
-  const namaPetugas = userData.nama_petugas;
+  const namaPetugas = userData.username;
   const level = userData.level;
 
   const handleNavigation = (url: string) => {

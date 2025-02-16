@@ -25,12 +25,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input"; // Import input component
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+import { useToast } from "@/hooks/use-toast"; // Import useToast
+import { CheckCircle } from "lucide-react"; // Import CheckCircle from lucide-react
 
 const BarangPegawaiPage = () => {
   const [availableItems, setAvailableItems] = useState<any[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [jumlahPinjam, setJumlahPinjam] = useState<number>(1);
   const [pegawaiId, setPegawaiId] = useState<number | null>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast(); // Initialize toast
 
   useEffect(() => {
     const fetchAvailableItems = async () => {
@@ -86,7 +91,9 @@ const BarangPegawaiPage = () => {
         }
 
         const data = await response.json();
+        console.log("Barang Pegawai Page - User ID:", data.id); // Log ID pegawai
         setPegawaiId(data.id);
+        localStorage.setItem("pegawai_id", data.id.toString()); // Save ID to localStorage
       } catch (error) {
         console.error("Error fetching pegawai ID:", error);
       }
@@ -102,6 +109,7 @@ const BarangPegawaiPage = () => {
         const token = localStorage.getItem("access_token");
         const requestBody = {
           id_pegawai: pegawaiId,
+          tanggal_pinjam: new Date().toISOString().split('T')[0],
           details: [
             {
               id_inventaris: selectedItemId,
@@ -121,6 +129,11 @@ const BarangPegawaiPage = () => {
 
         if (response.status === 201) {
           console.log("Peminjaman berhasil diajukan.");
+          toast({
+            title: "Peminjaman Berhasil",
+            description: "Peminjaman telah berhasil diajukan.",
+            action: <CheckCircle className="h-6 w-6 text-green-500" />,
+          });
           // Optionally, refresh the data or update the UI to reflect the change
         } else {
           console.error("Failed to submit peminjaman:", response.statusText);
@@ -142,7 +155,7 @@ const BarangPegawaiPage = () => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Beranda</BreadcrumbLink>
+                  <BreadcrumbLink href="/pegawai">Beranda</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
@@ -154,7 +167,15 @@ const BarangPegawaiPage = () => {
         </header>
         <div className="flex flex-1 flex-col gap-2 p-4">
           <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
-            <h1 className="text-3xl font-bold mb-6">Daftar Barang Tersedia</h1>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold">Daftar Barang Tersedia</h1>
+              <Button
+                variant="default"
+                onClick={() => navigate('/pegawai/barang/form')}
+              >
+                Ajukan Peminjaman Beberapa Barang
+              </Button>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>

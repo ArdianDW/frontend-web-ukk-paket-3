@@ -120,7 +120,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { toast } = useToast();
 
   const userData = JSON.parse(localStorage.getItem('user') || '{}');
-  const namaPetugas = userData.nama_petugas;
+  const namaPetugas = userData.username;
   const level = userData.level;
 
   const handleNavigation = (url: string) => {

@@ -46,6 +46,7 @@ export default function LaporanBarangPage() {
         "semua-barang": "all",
         "barang-baru": "recent",
         "barang-rusak": "rusak",
+        "barang-hilang": "hilang",
       };
       const type = typeMap[activeTab];
 
@@ -74,8 +75,22 @@ export default function LaporanBarangPage() {
       "semua-barang": "all",
       "barang-baru": "recent",
       "barang-rusak": "rusak",
+      "barang-hilang": "hilang",
     };
     const type = typeMap[activeTab];
+
+    const date = new Date();
+    const monthNames = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+
+    let fileName = `laporan-${type}.xlsx`;
+    if (type === "recent") {
+      fileName = `laporan-barang-masuk-${month}-${year}.xlsx`;
+    }
 
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/laporan/export/?type=${type}`, {
@@ -90,7 +105,7 @@ export default function LaporanBarangPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `laporan-${type}.xlsx`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -139,6 +154,7 @@ export default function LaporanBarangPage() {
                 <TabsTrigger value="semua-barang">Semua Barang</TabsTrigger>
                 <TabsTrigger value="barang-baru">Barang Baru Masuk</TabsTrigger>
                 <TabsTrigger value="barang-rusak">Barang Rusak</TabsTrigger>
+                <TabsTrigger value="barang-hilang">Barang Hilang</TabsTrigger>
               </TabsList>
               <TabsContent value="semua-barang">
                 <Table>
@@ -197,6 +213,34 @@ export default function LaporanBarangPage() {
                 </Table>
               </TabsContent>
               <TabsContent value="barang-rusak">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-base">No</TableHead>
+                      <TableHead className="text-base">Nama Barang</TableHead>
+                      <TableHead className="text-base">Kode</TableHead>
+                      <TableHead className="text-base">Kondisi</TableHead>
+                      <TableHead className="text-base">Jenis</TableHead>
+                      <TableHead className="text-base">Ruang</TableHead>
+                      <TableHead className="text-base">Tanggal Registrasi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {dataBarang.map((barang, index) => (
+                      <TableRow key={barang.id}>
+                        <TableCell className="text-sm">{index + 1}</TableCell>
+                        <TableCell className="text-sm">{barang.nama}</TableCell>
+                        <TableCell className="text-sm">{barang.kode_inventaris}</TableCell>
+                        <TableCell className="text-sm">{barang.kondisi}</TableCell>
+                        <TableCell className="text-sm">{barang.nama_jenis}</TableCell>
+                        <TableCell className="text-sm">{barang.nama_ruang}</TableCell>
+                        <TableCell className="text-sm">{barang.tanggal_register}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TabsContent>
+              <TabsContent value="barang-hilang">
                 <Table>
                   <TableHeader>
                     <TableRow>

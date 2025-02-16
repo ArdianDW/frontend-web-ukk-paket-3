@@ -29,6 +29,31 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandItem } from "@/components/ui/command";
 import { X, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableHead,
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
+import { useNavigate } from 'react-router-dom';
 
 type Pegawai = {
   id: number;
@@ -38,6 +63,10 @@ type Pegawai = {
 type Inventaris = {
   id: number;
   nama: string;
+  nama_jenis: string;
+  nama_ruang: string;
+  jumlah: number;
+  kode_inventaris: string;
 };
 
 const formSchema = z.object({
@@ -62,7 +91,11 @@ export default function PeminjamanPage() {
   const { toast } = useToast();
   const [pegawaiList, setPegawaiList] = useState<Pegawai[]>([]);
   const [itemList, setItemList] = useState<Inventaris[]>([]);
+  const [availableItems, setAvailableItems] = useState<Inventaris[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPegawai = async () => {
@@ -96,7 +129,7 @@ export default function PeminjamanPage() {
       }
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/inventaris/", {
+        const response = await fetch("http://127.0.0.1:8000/api/inventaris/baik/", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -105,7 +138,7 @@ export default function PeminjamanPage() {
           throw new Error("Network response was not ok");
         }
         const data: Inventaris[] = await response.json();
-        setItemList(data.map((item) => ({ id: item.id, nama: item.nama })));
+        setAvailableItems(data);
       } catch (error) {
         console.error("Error fetching inventaris:", error);
       }
@@ -114,6 +147,20 @@ export default function PeminjamanPage() {
     fetchPegawai();
     fetchInventaris();
   }, []);
+
+  const filteredItems = availableItems.filter(item =>
+    item.nama.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const onSubmit = async (data: FormData) => {
     const token = localStorage.getItem('access_token');
@@ -177,9 +224,10 @@ export default function PeminjamanPage() {
     form.setValue('items', currentItems.filter(i => i.name !== item));
   };
 
-  const filteredItems = searchTerm
-    ? itemList.filter(item => item.nama.toLowerCase().includes(searchTerm.toLowerCase()))
-    : itemList.slice(0, 5);
+  const handlePinjam = (item: Inventaris) => {
+    localStorage.setItem('selectedItem', JSON.stringify(item));
+    navigate('/peminjaman/form');
+  };
 
   return (
     <SidebarProvider>
@@ -202,121 +250,82 @@ export default function PeminjamanPage() {
             </Breadcrumb>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-2 p-2">
-          <div className="flex items-center justify-center py-8">
-            <div className="w-full max-w-md p-6 bg-white shadow-md rounded-lg">
-              <h1 className="text-3xl font-bold mb-6">Form Peminjaman</h1>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  <FormField
-                    control={form.control}
-                    name="borrowerName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nama Peminjam</FormLabel>
-                        <FormControl>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Input
-                                placeholder="Nama Peminjam"
-                                {...field}
-                              />
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full">
-                              <Command>
-                                <CommandInput
-                                  placeholder="Cari nama peminjam..."
-                                  onValueChange={setSearchTerm}
-                                />
-                                <CommandList>
-                                  {pegawaiList.map((pegawai, index) => (
-                                    <CommandItem
-                                      key={index}
-                                      onSelect={() => {
-                                        form.setValue('borrowerName', pegawai.nama_pegawai);
-                                      }}
-                                      className="text-left"
-                                    >
-                                      {pegawai.nama_pegawai}
-                                    </CommandItem>
-                                  ))}
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="items"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nama Barang</FormLabel>
-                        <FormControl>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Input
-                                placeholder="Pilih Barang"
-                                readOnly
-                                value={field.value.map(i => i.name).join(', ')}
-                              />
-                            </PopoverTrigger>
-                            <PopoverContent className="w-full">
-                              <Command>
-                                <CommandInput
-                                  placeholder="Cari nama barang..."
-                                  onValueChange={setSearchTerm}
-                                />
-                                <CommandList>
-                                  {filteredItems.map((item, index) => (
-                                    <CommandItem
-                                      key={index}
-                                      onSelect={() => handleSelectItem(item.nama)}
-                                      className="text-left"
-                                    >
-                                      {item.nama}
-                                    </CommandItem>
-                                  ))}
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                        </FormControl>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {field.value.map((item, index) => (
-                            <div key={index} className="flex items-center gap-1 border border-gray-300 bg-white px-2 py-1 rounded">
-                              <span>{item.name}</span>
-                              <Controller
-                                control={form.control}
-                                name={`items.${index}.quantity`}
-                                render={({ field }) => (
-                                  <Input
-                                    type="number"
-                                    min="1"
-                                    {...field}
-                                    className="w-16"
-                                  />
-                                )}
-                              />
-                              <button type="button" onClick={() => handleRemoveItem(item.name)} className="text-black">
-                                <X size={16} />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full">
-                    Pinjam
-                  </Button>
-                </form>
-              </Form>
+        <div className="flex flex-1 flex-col gap-2 p-4">
+          <div className="w-full max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold">Daftar Barang Tersedia</h1>
+              <Button
+                variant="default"
+                onClick={() => navigate('/peminjaman/form')}
+              >
+                Pinjam Barang
+              </Button>
             </div>
+            <div className="flex justify-between items-center mb-4">
+              <Input
+                type="text"
+                placeholder="Cari Nama Barang..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-1/2"
+              />
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>No</TableHead>
+                  <TableHead>Nama Barang</TableHead>
+                  <TableHead>Jenis</TableHead>
+                  <TableHead>Ruang</TableHead>
+                  <TableHead>Jumlah</TableHead>
+                  <TableHead>Kode Barang</TableHead>
+                  <TableHead>Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentItems.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{index + 1 + indexOfFirstItem}</TableCell>
+                    <TableCell>{item.nama}</TableCell>
+                    <TableCell>{item.nama_jenis}</TableCell>
+                    <TableCell>{item.nama_ruang}</TableCell>
+                    <TableCell>{item.jumlah}</TableCell>
+                    <TableCell>{item.kode_inventaris}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handlePinjam(item)}
+                      >
+                        Pinjam
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationPrevious
+                  onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                  className={currentPage === 1 ? "opacity-50 pointer-events-none" : ""}
+                />
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      isActive={i + 1 === currentPage}
+                      onClick={() => handlePageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationNext
+                  onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                  className={currentPage === totalPages ? "opacity-50 pointer-events-none" : ""}
+                />
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       </SidebarInset>
