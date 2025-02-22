@@ -120,43 +120,57 @@ export default function DaftarPenggunaPage() {
     }
   };
 
-  const handleSubmitPetugas = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const token = localStorage.getItem("access_token");
-
-    if (!token) {
-      console.error("Access token tidak ditemukan");
-      return;
-    }
-
+  const fetchPetugasData = async () => {
+    const token = localStorage.getItem('access_token');
     try {
-      console.log("Data yang dikirim:", petugasForm);
-
-      const response = await fetch("http://127.0.0.1:8000/api/petugas/", {
-        method: "POST",
+      const response = await fetch('http://127.0.0.1:8000/api/petugas/', {
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(petugasForm),
       });
-
-      if (response.ok) {
-        const newPetugas = await response.json();
-        setDataPetugas([...dataPetugas, newPetugas]);
-        setDialogOpen(false);
-        setPetugasForm({ username: "", password: "", nama_petugas: "", id_level: "" });
-        toast({
-          title: "Sukses",
-          description: "Petugas berhasil ditambahkan.",
-          action: <CheckCircle className="h-6 w-6 text-green-500" />,
-        });
-      } else {
-        const errorData = await response.json();
-        console.error("Failed to add petugas:", errorData);
-      }
+      const data = await response.json();
+      setDataPetugas(data);
     } catch (error) {
-      console.error("Error adding petugas:", error);
+      console.error('Error fetching petugas data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPetugasData();
+  }, []);
+
+  const handleSubmitPetugas = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch('http://127.0.0.1:8000/api/petugas/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...petugasForm,
+          id_level: operatorLevelId, // Set the level to operator
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error('Failed to create petugas');
+      }
+      // Reset form, close dialog, show success toast, and refresh list
+      setPetugasForm({ username: '', password: '', nama_petugas: '' });
+      setDialogOpen(false);
+      toast({
+        title: "Sukses",
+        description: "Petugas berhasil dibuat dengan level operator.",
+        action: <CheckCircle className="h-6 w-6 text-green-500" />,
+      });
+      fetchPetugasData(); // Refresh the list of petugas
+    } catch (error) {
+      console.error('Error creating petugas:', error);
     }
   };
 
@@ -294,6 +308,9 @@ export default function DaftarPenggunaPage() {
     }
   };
 
+  // Define the operator level ID
+  const operatorLevelId = 1; // Set to the actual ID for "operator"
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -362,25 +379,6 @@ export default function DaftarPenggunaPage() {
                             placeholder="Nama"
                             className="flex-1 mb-2"
                           />
-                        </div>
-                        <div className="flex items-center">
-                          <label className="w-24 text-black mr-4">Level</label>
-                          <Select
-                            name="id_level"
-                            value={petugasForm.id_level}
-                            onValueChange={(value) => setPetugasForm({ ...petugasForm, id_level: value })}
-                          >
-                            <SelectTrigger className="flex-1">
-                              <SelectValue placeholder="Pilih Level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {dataLevel.map((level) => (
-                                <SelectItem key={level.id} value={level.id.toString()}>
-                                  {level.nama_level}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
                         </div>
                         <Button type="submit">Simpan</Button>
                       </form>
@@ -473,10 +471,10 @@ export default function DaftarPenggunaPage() {
                         <TableCell className="text-sm">{petugas.level_name}</TableCell>
                         <TableCell className="text-sm">
                           <div className="flex space-x-2">
-                            <Button variant="outline" size="sm" onClick={() => handleEditClick(petugas)}>
+                            <Button variant="outline" size="sm" onClick={() => handleEditClick(petugas)} disabled={petugas.level_name === 'Admin'}>
                               Edit
                             </Button>
-                            <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(petugas)}>
+                            <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(petugas)} disabled={petugas.level_name === 'Admin'}>
                               Hapus
                             </Button>
                           </div>
@@ -562,25 +560,6 @@ export default function DaftarPenggunaPage() {
                         placeholder="Nama"
                         className="flex-1 mb-2"
                       />
-                    </div>
-                    <div className="flex items-center">
-                      <label className="w-24 text-black mr-4">Level</label>
-                      <Select
-                        name="id_level"
-                        value={(selectedUser as Petugas).id_level}
-                        onValueChange={(value) => setSelectedUser({ ...selectedUser, id_level: value })}
-                      >
-                        <SelectTrigger className="flex-1">
-                          <SelectValue placeholder="Pilih Level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {dataLevel.map((level) => (
-                            <SelectItem key={level.id} value={level.id.toString()}>
-                              {level.nama_level}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     </div>
                   </>
                 ) : (

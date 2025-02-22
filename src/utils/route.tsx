@@ -16,6 +16,7 @@ import UserLayout from "@/layout/UserLayout";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { AuthGuard } from '../hooks/use-auth-guard';
 import LaporanBarangPage from "@/app/laporan/laporan-barang/page";
+import LaporanTransaksiPage from "@/app/laporan/laporan-transaksi/page";
 import PegawaiHomePage from "@/app/home-pegawai/page";
 import BarangPegawaiPage from "@/app/barang-pegawai/page";
 import RiwayatPegawaiPage from "@/app/riwayat-pegawai/page";
@@ -97,6 +98,10 @@ const AppRoutes = createBrowserRouter([
             {
                 path : "/laporan-barang",
                 element : <AuthGuard requiredRoles={["Admin", "Operator"]}><LaporanBarangPage/></AuthGuard>
+            },
+            {
+                path : "/laporan-transaksi",
+                element : <AuthGuard requiredRoles={["Admin", "Operator"]}><LaporanTransaksiPage/></AuthGuard>
             },
             {
                 path : "/pegawai",

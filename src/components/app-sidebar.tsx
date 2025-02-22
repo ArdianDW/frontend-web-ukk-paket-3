@@ -93,7 +93,7 @@ const data = {
         },
         {
           title: "Peminjaman & Pengembalian",
-          url: "#",
+          url: "/laporan-transaksi",
         },
       ],
     },
